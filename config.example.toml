@@ -1,0 +1,20 @@
+[execution]
+database_path = ".media-auto-publisher/state.db"
+allow_live_publish = false
+subprocess_timeout_seconds = 900
+
+[risk]
+max_posts_per_account_per_day = 2
+min_interval_minutes = 180
+duplicate_window_days = 30
+stop_on_challenge = true
+
+[social_auto_upload]
+command = ["sau"]
+working_directory = ""
+
+[xianyu]
+base_url = "http://127.0.0.1:8089/api/v1"
+secret_env = "XIANYU_DISTRIBUTION_SECRET"
+request_timeout_seconds = 180
+

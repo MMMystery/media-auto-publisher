@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "media-auto-publisher"
+version = "0.1.0"
+description = "Risk-aware multi-platform publishing orchestrator"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "MMMystery" }]
+dependencies = []
+
+[project.scripts]
+mapub = "media_auto_publisher.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
