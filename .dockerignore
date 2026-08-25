@@ -1,0 +1,13 @@
+.git
+.venv
+.venv-social
+.playwright-browsers
+.pip-cache
+.media-auto-publisher
+data
+__pycache__
+*.pyc
+.DS_Store
+logs
+dist
+build

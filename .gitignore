@@ -1,6 +1,10 @@
 .DS_Store
 .env
+config.toml
 .venv/
+.venv-social/
+.playwright-browsers/
+.pip-cache/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -13,4 +17,3 @@ build/
 .media-auto-publisher/
 data/
 logs/
-

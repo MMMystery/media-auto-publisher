@@ -1,0 +1,26 @@
+{
+  "social-auto-upload": {
+    "path": "third_party/social-auto-upload",
+    "fork": "https://github.com/MMMystery/social-auto-upload.git",
+    "upstream": "https://github.com/dreammis/social-auto-upload.git",
+    "commit": "1c66b7db4b30585bbb40c58eb0aa572ffa3cce97",
+    "license": "MIT",
+    "runtime_role": "douyin and xiaohongshu publisher"
+  },
+  "xianyu-auto-reply": {
+    "path": "third_party/xianyu-auto-reply",
+    "fork": "https://github.com/MMMystery/xianyu-auto-reply.git",
+    "upstream": "https://github.com/zhinianboke/xianyu-auto-reply.git",
+    "commit": "29dc831d4498f3174f0502c989a352ef59815553",
+    "license": "AGPL-3.0 with an additional non-commercial notice in README",
+    "runtime_role": "xianyu listing publisher"
+  },
+  "xianyu-super-butler": {
+    "path": "third_party/xianyu-super-butler",
+    "fork": "https://github.com/MMMystery/xianyu-super-butler.git",
+    "upstream": "https://github.com/23Star/xianyu-super-butler.git",
+    "commit": "97c4e8a5976c2ed70f898be5bab72b9557ea2b1c",
+    "license": "AGPL-3.0",
+    "runtime_role": "reference implementation; not executed by default"
+  }
+}

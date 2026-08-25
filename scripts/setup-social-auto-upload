@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+UPSTREAM_DIR="$PROJECT_ROOT/third_party/social-auto-upload"
+VENV_DIR="$PROJECT_ROOT/.venv"
+if [ -z "${PYTHON_BIN:-}" ]; then
+  for candidate in python3.12 python3.11 python3; do
+    if command -v "$candidate" >/dev/null 2>&1 \
+      && "$candidate" -c 'import sys; raise SystemExit(not ((3, 11) <= sys.version_info < (3, 13)))'; then
+      PYTHON_BIN=$candidate
+      break
+    fi
+  done
+fi
+: "${PYTHON_BIN:?Python 3.11+ is required}"
+export PLAYWRIGHT_BROWSERS_PATH="$PROJECT_ROOT/.playwright-browsers"
+export PIP_CONFIG_FILE=/dev/null
+export PIP_CACHE_DIR="$PROJECT_ROOT/.pip-cache"
+
+if [ ! -f "$UPSTREAM_DIR/pyproject.toml" ]; then
+  echo "missing social-auto-upload submodule; run git submodule update --init --recursive" >&2
+  exit 1
+fi
+if [ ! -f "$UPSTREAM_DIR/conf.py" ]; then
+  cp "$UPSTREAM_DIR/conf.example.py" "$UPSTREAM_DIR/conf.py"
+fi
+
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+fi
+"$VENV_DIR/bin/python" -m pip install -e "$UPSTREAM_DIR"
+"$VENV_DIR/bin/python" -m pip install \
+  "playwright==1.58.0" "aiohttp>=3.9,<4" "httpx>=0.27,<1" \
+  "loguru>=0.7,<1" "qrcode[pil]>=8,<9"
+"$VENV_DIR/bin/patchright" install chromium
+"$VENV_DIR/bin/playwright" install chromium
+
+echo "publisher runtime installed at $VENV_DIR"

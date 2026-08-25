@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+
+cd "$PROJECT_ROOT"
+git submodule status
+
+if [ "${1:-}" = "--remote" ]; then
+  for name in social-auto-upload xianyu-auto-reply xianyu-super-butler; do
+    path="third_party/$name"
+    current=$(git -C "$path" rev-parse HEAD)
+    remote=$(git -C "$path" ls-remote origin HEAD | awk '{print $1}')
+    if [ "$current" = "$remote" ]; then
+      state="current"
+    else
+      state="update available"
+    fi
+    printf '%s current=%s remote=%s state=%s\n' "$name" "$current" "$remote" "$state"
+  done
+fi

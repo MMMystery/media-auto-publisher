@@ -1,0 +1,9 @@
+[submodule "third_party/social-auto-upload"]
+	path = third_party/social-auto-upload
+	url = https://github.com/MMMystery/social-auto-upload.git
+[submodule "third_party/xianyu-super-butler"]
+	path = third_party/xianyu-super-butler
+	url = https://github.com/MMMystery/xianyu-super-butler.git
+[submodule "third_party/xianyu-auto-reply"]
+	path = third_party/xianyu-auto-reply
+	url = https://github.com/MMMystery/xianyu-auto-reply.git

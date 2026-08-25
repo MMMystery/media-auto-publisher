@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+UPSTREAM_DIR="$PROJECT_ROOT/third_party/social-auto-upload"
+SAU_PYTHON="$PROJECT_ROOT/.venv/bin/python"
+export PLAYWRIGHT_BROWSERS_PATH="$PROJECT_ROOT/.playwright-browsers"
+export PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+
+if [ ! -x "$SAU_PYTHON" ]; then
+  echo "social-auto-upload is not installed; run scripts/setup-social-auto-upload first" >&2
+  exit 127
+fi
+
+cd "$UPSTREAM_DIR"
+exec "$SAU_PYTHON" -m media_auto_publisher.social_local "$@"

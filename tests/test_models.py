@@ -8,11 +8,11 @@ from media_auto_publisher.models import ContentKind, Platform, PublishJob
 
 
 class PublishJobTests(unittest.TestCase):
-    def test_fingerprint_is_stable(self) -> None:
+    def test_media_path_is_resolved(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             image = Path(directory, "cover.png")
             image.write_bytes(b"image")
-            first = PublishJob(
+            job = PublishJob(
                 platform=Platform.XIAOHONGSHU,
                 account="main",
                 kind=ContentKind.NOTE,
@@ -21,16 +21,7 @@ class PublishJobTests(unittest.TestCase):
                 media=(str(image),),
                 tags=("B", "a"),
             )
-            second = PublishJob(
-                platform=Platform.XIAOHONGSHU,
-                account="main",
-                kind=ContentKind.NOTE,
-                title="Title",
-                body="Body",
-                media=(str(image),),
-                tags=("a", "b"),
-            )
-            self.assertEqual(first.fingerprint, second.fingerprint)
+            self.assertEqual(job.media, (str(image.resolve()),))
 
     def test_xianyu_requires_listing_kind(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -49,4 +40,3 @@ class PublishJobTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

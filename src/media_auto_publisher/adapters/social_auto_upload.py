@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -23,12 +24,30 @@ CHALLENGE_MARKERS = (
     "风险验证",
 )
 URL_PATTERN = re.compile(r"https?://[^\s\]\[<>'\"]+")
+SENSITIVE_PATTERN = re.compile(
+    r"(?i)(authorization|cookie|password|secret|token|api[-_]?key)(\s*[:=]\s*)([^\s,;]+)"
+)
+
+
+def _redact_output(value: str, sensitive_values: tuple[str, ...]) -> str:
+    redacted = SENSITIVE_PATTERN.sub(r"\1\2<redacted>", value)
+    for secret in sensitive_values:
+        if secret:
+            redacted = redacted.replace(secret, "<redacted>")
+    return redacted
 
 
 class SocialAutoUploadAdapter(PublisherAdapter):
-    def __init__(self, config: SocialAutoUploadConfig, execution: ExecutionConfig) -> None:
+    def __init__(
+        self,
+        config: SocialAutoUploadConfig,
+        execution: ExecutionConfig,
+        *,
+        sensitive_env_names: tuple[str, ...] = (),
+    ) -> None:
         self.config = config
         self.execution = execution
+        self.sensitive_env_names = sensitive_env_names
 
     def build_command(self, job: PublishJob) -> list[str]:
         if job.platform not in {Platform.DOUYIN, Platform.XIAOHONGSHU}:
@@ -59,6 +78,11 @@ class SocialAutoUploadAdapter(PublisherAdapter):
 
         if tags:
             command.extend(["--tags", tags])
+        # The current Douyin creator page may silently ignore its final submit
+        # action in headless Chromium. Keep Douyin visible so trusted input and
+        # any platform challenge can be handled; Xiaohongshu stays headless.
+        if job.platform is Platform.DOUYIN:
+            command.append("--headed")
         return command
 
     def preview(self, job: PublishJob) -> dict[str, Any]:
@@ -71,8 +95,12 @@ class SocialAutoUploadAdapter(PublisherAdapter):
             "working_directory": str(self.config.working_directory or Path.cwd()),
         }
 
-    def publish(self, job: PublishJob) -> PublishResult:
+    def publish(self, job: PublishJob, *, live_authorized: bool = False) -> PublishResult:
+        if not live_authorized:
+            raise RuntimeError("pass --publish to perform a real post")
         command = self.build_command(job)
+        child_env = os.environ.copy()
+        sensitive_values = tuple(child_env.pop(name, "") for name in self.sensitive_env_names)
         try:
             completed = subprocess.run(
                 command,
@@ -81,20 +109,33 @@ class SocialAutoUploadAdapter(PublisherAdapter):
                 text=True,
                 timeout=self.execution.subprocess_timeout_seconds,
                 check=False,
+                env=child_env,
             )
         except FileNotFoundError:
             return PublishResult(
                 success=False,
                 message=f"publisher command not found: {self.config.command[0]}",
             )
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as exc:
+            parts: list[str] = []
+            for value in (exc.stdout, exc.stderr):
+                if isinstance(value, bytes):
+                    value = value.decode("utf-8", errors="replace")
+                if value:
+                    parts.append(value)
+            recent_output = _redact_output("\n".join(parts), sensitive_values).strip()
+            message = "发布器运行超时；重试前请先到平台后台确认是否已经发布"
+            if recent_output:
+                message += f"\n\n最后运行日志：\n{recent_output[-1200:]}"
             return PublishResult(
                 success=False,
-                message="publisher timed out; manual reconciliation is required before retry",
+                message=message,
                 retryable=False,
+                reconciliation_required=True,
             )
 
         output = "\n".join(part for part in (completed.stdout, completed.stderr) if part).strip()
+        output = _redact_output(output, sensitive_values)
         lowered = output.lower()
         challenge = any(marker in lowered for marker in CHALLENGE_MARKERS)
         urls = URL_PATTERN.findall(output)
@@ -107,4 +148,3 @@ class SocialAutoUploadAdapter(PublisherAdapter):
             retryable=completed.returncode != 0 and not challenge,
             details={"exit_code": completed.returncode},
         )
-

@@ -15,6 +15,7 @@ class PublishResult:
     external_url: str | None = None
     challenge_required: bool = False
     retryable: bool = False
+    reconciliation_required: bool = False
     details: dict[str, Any] = field(default_factory=dict)
 
     def safe_dict(self) -> dict[str, Any]:
@@ -25,6 +26,7 @@ class PublishResult:
             "external_url": self.external_url,
             "challenge_required": self.challenge_required,
             "retryable": self.retryable,
+            "reconciliation_required": self.reconciliation_required,
             "details": self.details,
         }
 
@@ -35,6 +37,5 @@ class PublisherAdapter(ABC):
         """Return a secret-free execution preview."""
 
     @abstractmethod
-    def publish(self, job: PublishJob) -> PublishResult:
+    def publish(self, job: PublishJob, *, live_authorized: bool = False) -> PublishResult:
         """Publish one job and return a normalized result."""
-

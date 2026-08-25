@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>发稿台</title>
+  <link rel="stylesheet" href="/assets/app.css?v=20260825-2">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="发稿台首页">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>发稿台</strong><small>把内容送到该去的地方</small></span>
+      </a>
+      <div class="system-state"><span class="state-dot"></span><span id="systemText">本地服务已连接</span></div>
+    </header>
+
+    <main class="workspace">
+      <aside class="platform-rail" aria-label="选择发布平台">
+        <div class="rail-heading"><span>投递平台</span><small>选择一个目的地</small></div>
+        <button class="platform-stamp active" data-platform="xiaohongshu" type="button">
+          <span class="stamp-glyph xhs">小</span>
+          <span><strong>小红书</strong><small>图文 · 视频</small></span>
+          <i class="account-light" aria-label="未登录"></i>
+        </button>
+        <button class="platform-stamp" data-platform="douyin" type="button">
+          <span class="stamp-glyph douyin">抖</span>
+          <span><strong>抖音</strong><small>图文 · 视频</small></span>
+          <i class="account-light" aria-label="未登录"></i>
+        </button>
+        <button class="platform-stamp" data-platform="xianyu" type="button">
+          <span class="stamp-glyph xianyu">闲</span>
+          <span><strong>闲鱼</strong><small>图片商品</small></span>
+          <i class="account-light" aria-label="未登录"></i>
+        </button>
+
+        <div class="account-box">
+          <label for="account">账号名称</label>
+          <div class="account-row">
+            <input id="account" value="main" autocomplete="off" maxlength="40">
+            <button id="loginButton" class="text-button" type="button">扫码登录</button>
+          </div>
+          <p id="accountHint">此账号尚未登录</p>
+        </div>
+      </aside>
+
+      <section class="composer" aria-labelledby="composerTitle">
+        <div class="composer-heading">
+          <div><span class="eyebrow">新内容</span><h1 id="composerTitle">写下你要发布的内容</h1></div>
+          <div class="kind-switch" id="kindSwitch" role="radiogroup" aria-label="内容类型">
+            <button class="active" data-kind="note" type="button">图文</button>
+            <button data-kind="video" type="button">视频</button>
+          </div>
+        </div>
+
+        <form id="publishForm">
+          <div class="field">
+            <label for="title">标题 <span id="titleCount">0 / 60</span></label>
+            <input id="title" name="title" placeholder="一句话说清这篇内容" maxlength="60" required>
+          </div>
+
+          <div class="field body-field">
+            <label for="body">正文 <span id="bodyCount">0 字</span></label>
+            <textarea id="body" name="body" rows="8" placeholder="在这里写正文。换行、标点和段落都会按原样发布。" required></textarea>
+          </div>
+
+          <div class="field" id="tagsField">
+            <label for="tags">话题 <span>用逗号分隔</span></label>
+            <input id="tags" name="tags" placeholder="例如：探店, 上海周末, 好物分享">
+          </div>
+
+          <div class="xianyu-fields" id="xianyuFields" hidden>
+            <div class="field-grid">
+              <div class="field"><label for="price">售价</label><div class="money-input"><span>¥</span><input id="price" inputmode="decimal" placeholder="89"></div></div>
+              <div class="field"><label for="originalPrice">原价 <span>选填</span></label><div class="money-input"><span>¥</span><input id="originalPrice" inputmode="decimal" placeholder="159"></div></div>
+            </div>
+            <div class="field"><label for="address">所在地</label><input id="address" placeholder="例如：上海市浦东新区"></div>
+            <div class="field shipping-field"><span class="field-label">发货方式</span><label><input type="radio" name="shipping" value="free" checked><span>包邮</span></label><label><input type="radio" name="shipping" value="none"><span>无需邮寄 / 自提</span></label></div>
+          </div>
+
+          <div class="field media-field">
+            <label>图片或视频 <span id="mediaHint">最多 9 张图片</span></label>
+            <button class="dropzone" id="dropzone" type="button">
+              <span class="drop-icon" aria-hidden="true">＋</span>
+              <strong>拖进来，或点击选择</strong>
+              <small id="dropHelp">支持 JPG、PNG、WEBP</small>
+              <input id="media" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+            </button>
+            <div class="media-list" id="mediaList"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="quiet-button" id="clearButton" type="button">清空内容</button>
+            <button class="publish-button" id="publishButton" type="submit"><span>立即发布</span><b aria-hidden="true">→</b></button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="preview-panel" aria-label="发布预览">
+        <div class="preview-heading"><span>发布预览</span><small>内容会大致这样呈现</small></div>
+        <article class="post-card">
+          <div class="post-author"><span class="avatar">M</span><span><strong id="previewAccount">main</strong><small id="previewPlatform">小红书 · 即将发布</small></span><i>•••</i></div>
+          <div class="preview-media" id="previewMedia"><div class="empty-media"><span>图片</span><small>添加素材后在这里预览</small></div></div>
+          <div class="post-copy"><h2 id="previewTitle">你的标题会出现在这里</h2><p id="previewBody">正文预览会随着输入实时更新。</p><div id="previewTags" class="preview-tags"></div></div>
+          <div class="post-price" id="previewPrice" hidden><strong>¥0</strong><span>发布到闲鱼</span></div>
+        </article>
+        <div class="preview-note"><span>提示</span><p>平台页面偶尔会调整。若发布失败，页面会显示原始原因，修改后可以再次尝试。</p></div>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="loginDialog" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" data-close-modal type="button" aria-label="关闭">×</button>
+      <span class="modal-kicker">账号登录</span>
+      <h2 id="loginTitle">扫码登录小红书</h2>
+      <div class="qr-frame" id="qrFrame"><div class="qr-loading"><i></i><span>正在生成二维码</span></div></div>
+      <p id="loginMessage">请稍候，不要关闭这个窗口。</p>
+      <button class="quiet-button modal-action" data-close-modal type="button">稍后再说</button>
+    </div>
+  </dialog>
+
+  <dialog id="progressDialog" class="modal">
+    <div class="modal-card progress-card">
+      <span class="dispatch-animation" aria-hidden="true"><i></i><b>→</b><i></i></span>
+      <span class="modal-kicker">正在投递</span>
+      <h2 id="progressTitle">正在发布内容</h2>
+      <p id="progressMessage">正在打开发布页面并上传素材…</p>
+      <div class="progress-line"><i></i></div>
+      <a id="resultLink" class="result-link" href="#" target="_blank" rel="noopener" hidden>查看已发布内容 →</a>
+      <button id="progressClose" class="quiet-button modal-action" type="button" hidden>返回发稿台</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js?v=20260825-2" defer></script>
+</body>
+</html>

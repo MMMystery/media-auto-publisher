@@ -5,12 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "media-auto-publisher"
 version = "0.1.0"
-description = "Risk-aware multi-platform publishing orchestrator"
+description = "Simple local publisher for Douyin, Xiaohongshu and Xianyu"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "MMMystery" }]
-dependencies = []
+dependencies = [
+  "fastapi>=0.115,<1",
+  "python-multipart>=0.0.20,<1",
+  "uvicorn>=0.34,<1",
+]
 
 [project.scripts]
 mapub = "media_auto_publisher.cli:main"
@@ -18,3 +22,5 @@ mapub = "media_auto_publisher.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+media_auto_publisher = ["web_static/*"]

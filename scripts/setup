@@ -1,0 +1,39 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+if [ -z "${PYTHON_BIN:-}" ]; then
+  for candidate in python3.12 python3.11 python3; do
+    if command -v "$candidate" >/dev/null 2>&1 \
+      && "$candidate" -c 'import sys; raise SystemExit(not ((3, 11) <= sys.version_info < (3, 13)))'; then
+      PYTHON_BIN=$candidate
+      break
+    fi
+  done
+fi
+: "${PYTHON_BIN:?Python 3.11+ is required}"
+VENV_DIR="$PROJECT_ROOT/.venv"
+
+"$PYTHON_BIN" -c 'import sys; raise SystemExit(0 if (3, 11) <= sys.version_info < (3, 13) else "Python 3.11 or 3.12 is required")'
+
+if [ ! -f "$PROJECT_ROOT/third_party/social-auto-upload/pyproject.toml" ]; then
+  echo "missing submodules; run git submodule update --init --recursive" >&2
+  exit 1
+fi
+
+export PIP_CONFIG_FILE=/dev/null
+export PIP_CACHE_DIR="$PROJECT_ROOT/.pip-cache"
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+fi
+"$VENV_DIR/bin/python" -m pip install -e "$PROJECT_ROOT"
+PYTHON_BIN="$VENV_DIR/bin/python" "$SCRIPT_DIR/setup-social-auto-upload"
+
+if [ ! -f "$PROJECT_ROOT/config.toml" ]; then
+  cp "$PROJECT_ROOT/config.example.toml" "$PROJECT_ROOT/config.toml"
+fi
+
+"$VENV_DIR/bin/mapub" doctor
+
+echo "core environment installed at $VENV_DIR"
